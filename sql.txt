@@ -1,0 +1,59 @@
+Total number of errors occurred (5xx/4xxx/3xx)
+select count(*) as total_number_of_errors from wowshared.business_log WHERE
+log_type = 1 AND
+date(created_date) = '2022-09-21'
+
+-- Top 20 services with higher number of errors occurred (5xx/4xxx/3xx)
+select service_name, count(*) as total_number_of_errors from wowshared.business_log where 
+log_type = 1 AND
+date(created_date) = '2022-09-21'
+group by service_name
+order by 2 DESC
+limit 20;
+
+
+--Top 10 slow performing APIs (Average execution time in milliseconds)
+SELECT service_name, round(avg(execution_time)) as avg_execution_time 
+FROM wowshared.business_log bl WHERE
+execution_time > 0 AND
+service_name <> 'User Active Time' AND
+service_name <> 'Parse CV Service:IT_ECONS' AND
+service_name <> 'List Google Calendar Events' AND
+service_name <> 'IVR - Create Call Request' AND
+service_name <> 'Execute Analytics ETL Job' AND
+service_name <> 'CloudConvert - Document To PDF Conversion' AND
+service_name <> 'Generate Custom JSON Report' AND
+service_name <> 'CloudConvert - Document To Text Conversion' AND
+service_name <> 'Generate Report From Template Queue Receiver.' AND
+service_name <> 'Parse CV Service:r_chilli' AND
+service_name <> 'Careers - Get Parsed CV Details' AND
+service_name <> 'Html To PDF Service' AND
+service_name <> 'Download Raw Data By SQL' AND
+service_name <> 'Parse CV Service:textkernel' AND
+service_name <> 'GemBox - Mail Merge' AND
+service_name <> 'Lambda Function - CV To PDF Conversion' AND
+service_name <> 'MailMerge Service' AND
+service_name <> 'IVR - Get Requested Call Details' AND
+service_name <> 'GemBox - Document To Text Conversion' AND
+service_name <> 'IVR - Get Requested Call Status' AND
+service_name <> 'Onboarding - New Client Setup' AND
+service_name <> 'DefaultConsideration Queue Receiver.' AND
+service_name <> 'Bulk Upload Queue Receiver.' AND
+service_name <> 'ProcessCV Queue Receiver.' AND
+service_name <> 'Document To Text Conversion' AND
+client_id not in(999, 1017, 1012, 1047, 1059) AND
+service_name <> 'Lambda - FileConverter(Gembox)' AND
+service_name <> 'Lambda - File Converter(CloudConvert-V2)' AND
+service_name <> 'GemBox-v2 - Mail Merge' AND
+date(created_date) between '2022-07-01'  AND '2022-07-22'
+group by service_name 
+having round(avg(execution_time)) > 2000
+order by avg_execution_time desc limit 10;
+
+--Top 10 frequently used APIs
+SELECT service_name, count(*) as api_call_count 
+FROM wowshared.business_log bl 
+WHERE date(created_date) between '2022-07-01'  AND '2022-07-22'
+AND service_name is not null
+group by service_name
+order by 2 desc limit 20;

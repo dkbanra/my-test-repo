@@ -4,19 +4,33 @@ on:
   push:
     branches:
     - main
-
+        
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Upload S3    
-        uses: shallwefootball/s3-upload-action@master
-        id: S3
-        with:
-          aws_key_id: ${{secrets.AWS_KEY_ID}}
-          aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-          aws_bucket: shivv
-          source: 'sql.txt'
-          destination_dir: 'temp/'
-          
+    - name: upload sql
+    - uses: actions/checkout@master
+    - uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --follow-symlinks --delete --exclude '.git/*' --exclude '.gitignore' --exclude '.github/*' --exclude '.github' --exclude 'README.md'
+      env:
+        AWS_S3_BUCKET: jeevdayatrust.com
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'ap-south-1'   # optional: defaults     
+        source: 'sql.txt'
+        destination_dir: 'f1/'
+    - name: upload temp
+    - uses: actions/checkout@master
+    - uses: jakejarvis/s3-sync-action@master
+      with:
+        args: --acl public-read --follow-symlinks --delete --exclude '.git/*' --exclude '.gitignore' --exclude '.github/*' --exclude '.github' --exclude 'README.md'
+      env:
+        AWS_S3_BUCKET: jeevdayatrust.com
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: 'ap-south-1'   # optional: defaults     
+        source: 'temp.txt'
+        destination_dir: 'f2/'    
       

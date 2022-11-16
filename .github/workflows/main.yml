@@ -19,7 +19,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: 'us-east-1'   # 
         source_dir: 'sql/'
-        destination-dir: 'temp/'
+        destination-dir: 'f1/'
         
         
   

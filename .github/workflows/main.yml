@@ -9,17 +9,14 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: keithweaver/aws-s3-github-action@v1.0.0
-      with:
-        args: --acl public-read --follow-symlinks --delete --exclude '.git/*' --exclude '.gitignore' --exclude '.github/*' --exclude '.github' --exclude 'README.md'
-        AWS_S3_BUCKET: shivv
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'us-east-1'   # 
-        command: cp
-        source: ./sql.txt
-        destination_dir: s3://shivv/f1
-        
-        
-  
+      - name: Upload S3    
+        uses: shallwefootball/s3-upload-action@master
+        id: S3
+        with:
+          aws_key_id: ${{secrets.AWS_KEY_ID}}
+          aws_secret_access_key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws_bucket: shivv
+          source: 'sql.txt'
+          destination_dir: 'temp/'
+          
+      

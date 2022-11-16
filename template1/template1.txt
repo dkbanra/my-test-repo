@@ -1,0 +1,71 @@
+Description: Sysadmin Tutorials - Build Linux Web Server
+Resources:
+  webserver1:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-08c40ec9ead489470
+      Tags:
+        - Key: Name
+          Value: webserver1
+      UserData: !Base64 
+        'Fn::Sub': >
+          #!/bin/bash -xe
+
+          sudo su -
+
+
+          sudo apt-get install  apache2 -y
+
+          systemctl start apache2   
+
+          sudo apt-get update
+
+          sudo apt-get install wget
+
+          wget 
+          https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+
+          dpkg -i -E ./amazon-cloudwatch-agent.deb
+
+
+          rm -rf .config.json.swp
+
+
+          echo "{
+        "agent": {
+                "metrics_collection_interval": 60,
+                "run_as_user": "root"
+        },
+        "logs": {
+                "logs_collected": {
+                        "files": {
+                                "collect_list": [
+                                        {
+                                                "file_path": "/var/log/apache2/access.log",
+                                                "log_group_name": "prod",
+                                                "log_stream_name": "access.log",
+                                                "retention_in_days": -1
+                                        },
+                                        {
+                                                "file_path": "/var/log/apache2/error.log",
+                                                "log_group_name": "prod",
+                                                "log_stream_name": "error.log",
+                                                "retention_in_days": -1
+                                        }
+                                ]
+                        }
+                }
+        },
+        "metrics": {
+                "aggregation_dimensions": [
+                        [
+                                "InstanceId"
+                        ]
+                ],
+                "append_dimensions": {" > /opt/aws/amazon-cloudwatch-agent/bin/config.json 
+
+
+          /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a
+          fetch-config -m ec2 -c
+          file:/opt/aws/amazon-cloudwatch-agent/bin/config.json -s

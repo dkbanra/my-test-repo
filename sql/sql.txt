@@ -6,7 +6,7 @@ date(created_date) = '2022-09-21'
 -- Top 20 services with higher number of errors occurred (5xx/4xxx/3xx)
 select service_name, count(*) as total_number_of_errors from wowshared.business_log where 
 log_type = 1 AND
-date(created_date) = '2022-09-21'
+date(created_date) = '2022-09-21'   
 group by service_name
 order by 2 DESC
 limit 20;

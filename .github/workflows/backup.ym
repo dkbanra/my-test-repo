@@ -2,7 +2,7 @@ name: Backup Repositories to S3
 
 on:
   schedule:
-    - cron: "* * * * *"
+    - cron: "* * * * *"   
 
 jobs:
   backup:

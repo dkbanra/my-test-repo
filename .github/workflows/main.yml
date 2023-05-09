@@ -1,4 +1,8 @@
-name: backupgit
+name: Backup Repositories to S3
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   backup:
@@ -25,21 +29,17 @@ jobs:
           | jq -r '.[] | .full_name' \
           > repositories.txt
 
-    - name: Backup Repositories
-      env:
-        AWS_S3_BUCKET: backupgit98
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: 'us-east-1'   # optional: defaults to us-east-1
-
-       run: |
+      - name: Backup Repositories
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET_NAME: backupgit98
+        run: |
           while IFS= read -r repository; do
             echo "Backing up $repository..."
             git clone --depth 1 "https://github.com/$repository"
             zip -r "$repository.zip" "$repository"
-            aws s3 cp "$repository.zip" "s3://backupgit98/$repository.zip"
+            aws s3 cp "$repository.zip" "s3://$backupgit98/$repository.zip"
             rm -rf "$repository" "$repository.zip"
             echo "Backup of $repository completed."
-          done < repositories.txt   
-        
-   
+          done < repositories.txt

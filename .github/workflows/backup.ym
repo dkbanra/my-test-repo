@@ -20,7 +20,7 @@ jobs:
 
       - name: Fetch Repository List
         env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN: ${{ secrets.TOKEN }}
         run: |
           curl -H "Authorization: Bearer $TOKEN" \
           "https://api.github.com/user/repos?per_page=100" \

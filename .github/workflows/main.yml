@@ -1,18 +1,31 @@
-name: Upload Website
-
-on:
-  push:
-    branches:
-    - main
+name: backupgit
 
 jobs:
-  deploy:
+  backup:
     runs-on: ubuntu-latest
+
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-    - uses: actions/checkout@master
-    - uses: jakejarvis/s3-sync-action@master
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
 
+      - name: Install Dependencies
+        run: pip install awscli
+
+      - name: Fetch Repository List
+        env:
+          TOKEN: ${{ secrets.TOKEN }}
+        run: |
+          curl -H "Authorization: Bearer $TOKEN" \
+          "https://api.github.com/user/repos?per_page=100" \
+          | jq -r '.[] | .full_name' \
+          > repositories.txt
+
+    - name: Backup Repositories
       env:
         AWS_S3_BUCKET: backupgit98
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -20,5 +33,14 @@ jobs:
         AWS_REGION: 'us-east-1'   # optional: defaults to us-east-1
         SOURCE_DIR: 'sql/'
         DEST_DIR: 'f1/'
+       run: |
+          while IFS= read -r repository; do
+            echo "Backing up $repository..."
+            git clone --depth 1 "https://github.com/$repository"
+            zip -r "$repository.zip" "$repository"
+            aws s3 cp "$repository.zip" "s3://backupgit98/$repository.zip"
+            rm -rf "$repository" "$repository.zip"
+            echo "Backup of $repository completed."
+          done < repositories.txt   
         
    

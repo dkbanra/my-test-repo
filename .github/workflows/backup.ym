@@ -1,8 +1,6 @@
 name: Backup Repositories to S3
 
-on:
-  schedule:
-    - cron: "* * * * *"   
+
 
 jobs:
   backup:
@@ -24,7 +22,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -H "Authorization: Bearer TOKEN" \
+          curl -H "Authorization: Bearer $TOKEN" \
           "https://api.github.com/user/repos?per_page=100" \
           | jq -r '.[] | .full_name' \
           > repositories.txt

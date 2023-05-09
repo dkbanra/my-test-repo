@@ -1,1 +1,46 @@
+name: Backup Repositories to S3
+
+on:
+  schedule:
+    - cron: "* * * * *"
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Dependencies
+        run: pip install awscli
+
+      - name: Fetch Repository List
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -H "Authorization: Bearer $GITHUB_TOKEN" \
+          "https://api.github.com/user/repos?per_page=100" \
+          | jq -r '.[] | .full_name' \
+          > repositories.txt
+
+      - name: Backup Repositories
+        env:
+          AWS_ACCESS_KEY_ID: ${{AKIATCUSGZWX2XVUFHKL}}
+          AWS_SECRET_ACCESS_KEY: ${{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}}
+          S3_BUCKET_NAME: shivvvv
+        run: |
+          while IFS= read -r repository; do
+            echo "Backing up $repository..."
+            git clone --depth 1 "https://github.com/$repository"
+            zip -r "$repository.zip" "$repository"
+            aws s3 cp "$repository.zip" "s3://shivvvv/$repository.zip"
+            rm -rf "$repository" "$repository.zip"
+            echo "Backup of $repository completed."
+          done < repositories.txt
 
